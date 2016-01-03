@@ -1,0 +1,34 @@
+package com.example.lim.coolweather.model;
+
+/**
+ * Created by lim on 2015/12/23.
+ */
+public class Province {
+    int id;
+    String provinceName;
+    String provinceCode;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
+    }
+
+    public String getProvinceCode() {
+        return provinceCode;
+    }
+
+    public void setProvinceCode(String provinceCode) {
+        this.provinceCode = provinceCode;
+    }
+}
