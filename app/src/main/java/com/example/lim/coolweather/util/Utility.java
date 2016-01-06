@@ -1,11 +1,16 @@
 package com.example.lim.coolweather.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.lim.coolweather.db.CoolWeatherDB;
 import com.example.lim.coolweather.model.City;
 import com.example.lim.coolweather.model.Country;
 import com.example.lim.coolweather.model.Province;
+import com.example.lim.coolweather.model.WeatherInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,6 +52,30 @@ public class Utility {
                     country.setCountryName(countryName);
                     coolWeatherDB.saveCountry(country);
                 }
+                return true;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean handleWeatherInfo(Context context, String response, String country){
+        try {
+            JSONObject jo = new JSONObject(response);
+            if (jo.getString("resultcode").equals("200")){
+                jo = jo.getJSONObject("result");
+                JSONObject sk = jo.getJSONObject("sk");
+                JSONObject today = jo.getJSONObject("today");
+
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                editor.putBoolean( "localData",true);
+                editor.putString("time", "同步时间：" + sk.getString("time"));
+                editor.putString("date", today.getString("date_y"));
+                editor.putString("temperature",today.getString("temperature"));
+                editor.putString("weather", today.getString("weather"));
+                editor.putString("countryName", country);
+                editor.commit();
                 return true;
             }
         }catch (Exception e){

@@ -2,7 +2,10 @@ package com.example.lim.coolweather.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Adapter;
@@ -44,12 +47,22 @@ public class ChooseAreaActivity extends Activity {
     public static final int LEVEL_COUNTRY = 2;
     private int currentLevel;
     private ProgressDialog progressDialog;
-
+    private Boolean isFromWeatherActivity;
     private static final String SUPPORT_CITY_API = "http://v.juhe.cn/weather/citys?key=1d1bad6d9ea452439b2731aff5a03abf";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //直接跳到WeatherActivity
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
+        if (sharedPreferences.getBoolean("localData",false) && !isFromWeatherActivity){
+            Intent intent = new Intent(this,WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.choose_area);
         listView = (ListView) findViewById(R.id.list_view);
         titleText = (TextView) findViewById(R.id.title_text);
@@ -59,12 +72,19 @@ public class ChooseAreaActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (currentLevel == LEVEL_PROVINCE){
+                if (currentLevel == LEVEL_PROVINCE) {
                     selectedProvince = provinceList.get(position);
                     queryCity();
-                }else if(currentLevel == LEVEL_CITY){
+                } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCountry();
+                } else if (currentLevel == LEVEL_COUNTRY) {
+                    selectedCountry = countryList.get(position);
+                    String countryName = selectedCountry.getCountryName();
+                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+                    intent.putExtra("countryName", countryName);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -72,7 +92,7 @@ public class ChooseAreaActivity extends Activity {
     }
 
     private void queryFromServer(final String type) {
-
+        showProgressDialog();
         HttpUtil.sendHttpRequest(SUPPORT_CITY_API, new HttpCallbackListener() {
             @Override
             public void onFinished(String response) {
@@ -130,6 +150,10 @@ public class ChooseAreaActivity extends Activity {
         }else if (currentLevel == LEVEL_CITY){
             queryProvince();
         }else{
+            if (isFromWeatherActivity) {
+                Intent intent = new Intent(this, WeatherActivity.class);
+                startActivity(intent);
+            }
             finish();
         }
     }

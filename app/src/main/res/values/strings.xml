@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">coolweather</string>
+    <string name="app_name">我的天气</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
