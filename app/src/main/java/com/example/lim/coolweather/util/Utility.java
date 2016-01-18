@@ -15,6 +15,9 @@ import com.example.lim.coolweather.model.WeatherInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by lim on 2015/12/29.
  */
@@ -67,14 +70,24 @@ public class Utility {
                 jo = jo.getJSONObject("result");
                 JSONObject sk = jo.getJSONObject("sk");
                 JSONObject today = jo.getJSONObject("today");
-
+                JSONArray future = jo.getJSONArray("future");
+                List<String> arr = new ArrayList<>();
+                for (int i = 0; i < 6; i++) {
+                    JSONObject jobject = future.getJSONObject(i);
+                    String temp = "";
+                    temp = jobject.getString("temperature")+"\n"+jobject.getString("weather")+"\n"+jobject.getString("week")+"\n"+jobject.getString("date");
+                    arr.add(temp);
+                }
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                editor.putBoolean( "localData",true);
+                editor.putBoolean("localData", true);
                 editor.putString("time", "同步时间：" + sk.getString("time"));
                 editor.putString("date", today.getString("date_y"));
                 editor.putString("temperature",today.getString("temperature"));
                 editor.putString("weather", today.getString("weather"));
                 editor.putString("countryName", country);
+                for (int i = 0; i < 6; i++) {
+                    editor.putString("temp"+i,arr.get(i));
+                }
                 editor.commit();
                 return true;
             }
