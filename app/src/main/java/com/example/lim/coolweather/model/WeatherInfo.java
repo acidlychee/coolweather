@@ -8,6 +8,33 @@ public class WeatherInfo {
     String date;
     String temperature;
     String weather;
+    String week;
+    int no;
+    int cityId;
+
+    public String getWeek() {
+        return week;
+    }
+
+    public void setWeek(String week) {
+        this.week = week;
+    }
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+
+    public int getCityId() {
+        return cityId;
+    }
+
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
+    }
 
     public String getTime() {
         return time;

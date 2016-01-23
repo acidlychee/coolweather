@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.example.lim.coolweather.model.City;
 import com.example.lim.coolweather.model.Country;
 import com.example.lim.coolweather.model.Province;
+import com.example.lim.coolweather.model.WeatherInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class CoolWeatherDB {
     private static final  String DB_NAME = "cool_weather";
-    private static final  int VERSION = 1;
+    private static final  int VERSION = 4;
     private SQLiteDatabase db;
     private static CoolWeatherDB coolWeatherDB;
     private static final int NOTEXIST = -1;
@@ -170,4 +171,60 @@ public class CoolWeatherDB {
             }
         }
     }
+
+    public  void saveWeathers(List<WeatherInfo> weatherInfos){
+        for (WeatherInfo weather:weatherInfos
+             ) {
+            ContentValues conv = new ContentValues();
+            conv.put("no",weather.getNo());
+            conv.put("weather",weather.getWeather());
+            conv.put("temperature",weather.getTemperature());
+            conv.put("date",weather.getDate());
+            conv.put("week",weather.getWeek());
+            conv.put("city_id",weather.getCityId());
+            conv.put("time",weather.getTime());
+            db.insert("Weather", null, conv);
+        }
+    }
+
+    public  void updateWeathers(List<WeatherInfo> weatherInfos, int cityID){
+        for (WeatherInfo weather:weatherInfos
+                ) {
+            ContentValues conv = new ContentValues();
+            conv.put("weather",weather.getWeather());
+            conv.put("temperature",weather.getTemperature());
+            conv.put("date",weather.getDate());
+            conv.put("week",weather.getWeek());
+            conv.put("time",weather.getTime());
+            db.update("Weather", conv, "no = ? and city_id = ? ",
+                    new String[]{String.valueOf(weather.getNo()),String.valueOf(weather.getCityId())});
+        }
+    }
+
+    public List<WeatherInfo> getWeathers(String cityName){
+        Cursor cursor = null;
+        int cityId = getCityId(cityName);
+        List<WeatherInfo> list = new ArrayList<>();
+        try {
+            cursor = db.query("Weather", null, "city_id = ?", new String[]{String.valueOf(cityId)}, null, null, null);
+            while (cursor.moveToNext()){
+                WeatherInfo wi = new WeatherInfo();
+                wi.setDate(cursor.getString(cursor.getColumnIndex("date")));
+                wi.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                wi.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+                wi.setTemperature(cursor.getString(cursor.getColumnIndex("temperature")));
+                wi.setCityId(cursor.getInt(cursor.getColumnIndex("city_id")));
+                wi.setNo(cursor.getInt(cursor.getColumnIndex("no")));
+                list.add(wi);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if (cursor!=null){
+                cursor.close();
+            }
+        }
+        return list;
+    }
+
 }

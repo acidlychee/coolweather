@@ -41,6 +41,7 @@ public class WeatherAdapter extends BaseAdapter {
      * 用于显示当前日期
      */
     private TextView currentDateText;
+    private TextView countryName;
 
     public WeatherAdapter(Context context, List<Map<String,String>> list) {
         mContext = context;
@@ -71,7 +72,7 @@ public class WeatherAdapter extends BaseAdapter {
 
                 publishText = (TextView) convertView.findViewById(R.id.publish_text);
                 weatherInfoLayout = (LinearLayout) convertView.findViewById(R.id.weather_info_layout);
-
+                countryName = (TextView) weatherInfoLayout.findViewById(R.id.country_name);
                 weatherDespText = (TextView) weatherInfoLayout.findViewById(R.id.weather_desp);
                 temperature = (TextView) weatherInfoLayout.findViewById(R.id.weather);
                 currentDateText = (TextView) weatherInfoLayout.findViewById(R.id.current_date);
@@ -80,6 +81,7 @@ public class WeatherAdapter extends BaseAdapter {
                 weatherDespText.setText(map.get("weather").toString());
                 temperature.setText(map.get("temperature").toString());
                 currentDateText.setText(map.get("date").toString());
+                countryName.setText(map.get("countryName").toString());
                 break;
             case TYPE_1:
                     break;

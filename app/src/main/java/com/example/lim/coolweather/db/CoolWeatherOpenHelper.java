@@ -22,6 +22,15 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
                                 +"country_name text, "
                                 +"country_code text, "
                                 +"city_id integer)";
+    private static final String CREATE_WEATHERINFO = "create table Weather ("
+                                +"_id integer primary key,"
+                                +"weather text,"
+                                +"date text,"
+                                +"temperature text,"
+                                +"week text,"
+                                +"time text,"
+                                +"no integer,"
+                                +"city_id integer)";
 
     public CoolWeatherOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -36,6 +45,7 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("drop table if exists Weather");
+        db.execSQL(CREATE_WEATHERINFO);
     }
 }

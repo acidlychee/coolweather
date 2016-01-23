@@ -26,6 +26,7 @@ import com.example.lim.coolweather.util.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by lim on 2015/12/30.
@@ -56,11 +57,16 @@ public class ChooseAreaActivity extends Activity {
         //直接跳到WeatherActivity
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
-        if (sharedPreferences.getBoolean("localData",false) && !isFromWeatherActivity){
-            Intent intent = new Intent(this,WeatherActivity.class);
-            startActivity(intent);
-            finish();
-            return;
+
+        coolWeatherDB = CoolWeatherDB.getInstance(this);
+        Set<String> citySet = sharedPreferences.getStringSet("citySet", null);
+        if (citySet != null && !isFromWeatherActivity){
+            if (citySet.size()!=0){
+                Intent intent = new Intent(this,WeatherActivity.class);
+                startActivity(intent);
+                finish();
+                return;
+            }
         }
 
         setContentView(R.layout.choose_area);
@@ -68,7 +74,6 @@ public class ChooseAreaActivity extends Activity {
         titleText = (TextView) findViewById(R.id.title_text);
         adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,dataList);
         listView.setAdapter(adapter);
-        coolWeatherDB = CoolWeatherDB.getInstance(this);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

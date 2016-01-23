@@ -22,7 +22,6 @@ import java.util.List;
  * Created by lim on 2015/12/29.
  */
 public class Utility {
-
     public static boolean handelSupportCitysResponse(CoolWeatherDB coolWeatherDB,String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -64,6 +63,7 @@ public class Utility {
     }
 
     public static boolean handleWeatherInfo(Context context, String response, String country){
+        CoolWeatherDB db = CoolWeatherDB.getInstance(context);
         try {
             JSONObject jo = new JSONObject(response);
             if (jo.getString("resultcode").equals("200")){
@@ -71,24 +71,34 @@ public class Utility {
                 JSONObject sk = jo.getJSONObject("sk");
                 JSONObject today = jo.getJSONObject("today");
                 JSONArray future = jo.getJSONArray("future");
-                List<String> arr = new ArrayList<>();
+                List<WeatherInfo> weatherInfoList = new ArrayList<>();
                 for (int i = 0; i < 6; i++) {
+                    WeatherInfo wi = new WeatherInfo();
                     JSONObject jobject = future.getJSONObject(i);
-                    String temp = "";
-                    temp = jobject.getString("temperature")+"\n"+jobject.getString("weather")+"\n"+jobject.getString("week")+"\n"+jobject.getString("date");
-                    arr.add(temp);
+                    wi.setNo(i+1);
+                    wi.setWeather(jobject.getString("weather"));
+                    wi.setDate(jobject.getString("date"));
+                    wi.setTemperature(jobject.getString("temperature"));
+                    wi.setCityId(db.getCityId(country));
+                    wi.setWeek(jobject.getString("week"));
+                    weatherInfoList.add(wi);
                 }
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                editor.putBoolean("localData", true);
-                editor.putString("time", "同步时间：" + sk.getString("time"));
-                editor.putString("date", today.getString("date_y"));
-                editor.putString("temperature",today.getString("temperature"));
-                editor.putString("weather", today.getString("weather"));
-                editor.putString("countryName", country);
-                for (int i = 0; i < 6; i++) {
-                    editor.putString("temp"+i,arr.get(i));
+
+                WeatherInfo wi = new WeatherInfo();
+                wi.setNo(0);
+                wi.setCityId(db.getCityId(country));
+                wi.setTemperature(today.getString("temperature"));
+                wi.setWeather(today.getString("weather"));
+                wi.setTime("同步时间： "+sk.getString("time"));
+                wi.setDate(today.getString("date_y"));
+
+                weatherInfoList.add(wi);
+                if (db.getWeathers(country).isEmpty()){
+                    db.saveWeathers(weatherInfoList);
+                }else{
+                    db.updateWeathers(weatherInfoList, db.getCityId(country));
                 }
-                editor.commit();
+
                 return true;
             }
         }catch (Exception e){

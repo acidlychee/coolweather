@@ -28,18 +28,12 @@
             android:layout_alignParentRight="true"
             android:background="@android:drawable/stat_notify_sync"/>
     </RelativeLayout>
-    <com.example.lim.coolweather.view.RefreshableView
-        android:id="@+id/refreshable_view"
+
+    <android.support.v4.view.ViewPager
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
-        <ListView
-            android:id="@+id/list_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </ListView>
-
-    </com.example.lim.coolweather.view.RefreshableView>
+        android:layout_height="fill_parent"
+        android:id="@+id/viewpager">
+    </android.support.v4.view.ViewPager>
 
 
 </LinearLayout>
