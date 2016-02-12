@@ -13,4 +13,6 @@
     <string name="title_activity_main">MainActivity</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_manager_citys">ManagerCitys</string>
+    <string name="title_activity_test">Test</string>
 </resources>

@@ -24,6 +24,10 @@
 
         <receiver android:name=".receiver.AutoUpdateReceiver" />
 
+        <activity
+            android:name=".activity.ManagerCitys"
+            android:label="@string/title_activity_manager_citys" >
+        </activity>
     </application>
 
 </manifest>

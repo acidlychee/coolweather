@@ -172,6 +172,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.refesh_weather:
+                Intent intent1 = new Intent(this, ManagerCitys.class);
+                startActivity(intent1);
+                finish();
+                break;
             default:
                 break;
         }

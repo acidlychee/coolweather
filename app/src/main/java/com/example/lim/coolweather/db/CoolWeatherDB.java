@@ -19,7 +19,7 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class CoolWeatherDB {
     private static final  String DB_NAME = "cool_weather";
-    private static final  int VERSION = 4;
+    private static final  int VERSION = 5;
     private SQLiteDatabase db;
     private static CoolWeatherDB coolWeatherDB;
     private static final int NOTEXIST = -1;
