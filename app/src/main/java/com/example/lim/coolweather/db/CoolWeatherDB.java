@@ -19,7 +19,7 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class CoolWeatherDB {
     private static final  String DB_NAME = "cool_weather";
-    private static final  int VERSION = 5;
+    private static final  int VERSION = 6;
     private SQLiteDatabase db;
     private static CoolWeatherDB coolWeatherDB;
     private static final int NOTEXIST = -1;
@@ -171,6 +171,7 @@ public class CoolWeatherDB {
             }
         }
     }
+/*
 
     public  void saveWeathers(List<WeatherInfo> weatherInfos){
         for (WeatherInfo weather:weatherInfos
@@ -226,5 +227,6 @@ public class CoolWeatherDB {
         }
         return list;
     }
+*/
 
 }

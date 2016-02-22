@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -120,6 +121,7 @@ public class LeftSlideDeleteListView extends ListView {
             deleteTV.setBackgroundColor(Color.RED);
             deleteTV.setTextColor(Color.WHITE);
             deleteTV.setGravity(Gravity.CENTER);
+            deleteTV.setTextSize(TypedValue.COMPLEX_UNIT_SP,25);
             deleteTV.setPadding(dptopx(30, getContext()), 0, dptopx(30, getContext()), 0);
 
             deleteTV.setOnClickListener(new OnClickListener() {

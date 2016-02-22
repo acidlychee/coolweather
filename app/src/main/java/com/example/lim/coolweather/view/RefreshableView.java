@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.adapter.WeatherAdapter;
+import com.example.lim.coolweather.model.WeatherBean;
+import com.example.lim.coolweather.model.WeatherInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +48,11 @@ public class RefreshableView extends LinearLayout implements View.OnTouchListene
     private boolean ableToPull;
     private float yDown;
     private int currentStatus;
+
     public WeatherAdapter adapter;
     public String cityName;
-    public List<Map<String,String>> mList;
+    public List<WeatherInfo> mList;
+    public WeatherInfo weatherInfo;
     /**
      * 一分钟的毫秒值，用于判断上次的更新时间
      */

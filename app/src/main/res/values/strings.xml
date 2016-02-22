@@ -15,4 +15,5 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_manager_citys">ManagerCitys</string>
     <string name="title_activity_test">Test</string>
+    <string name="default_text">_ _</string>
 </resources>

@@ -2,36 +2,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical">
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/weather_header"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="#484E61">
+        android:layout_height="30dp"
+        android:background="@color/blue">
         <Button
             android:id="@+id/change_city"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:background="@android:drawable/btn_star"/>
-        <TextView
-            android:id="@+id/city_name"
-            android:layout_width="wrap_content"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="#fff"
-            android:textSize="24sp" />
-        <Button
-            android:id="@+id/refesh_weather"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginRight="10dp"
-            android:layout_alignParentRight="true"
-            android:background="@android:drawable/stat_notify_sync"/>
-    </RelativeLayout>
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/setting"/>
+        <LinearLayout
+            android:id="@+id/dots_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:paddingRight="42dp">
+<!--
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:src="@drawable/page_indicator_focused"/>
+-->
+        </LinearLayout>
 
+    </LinearLayout>
+
+    <!-- 装入多个城市天气 pull_reflesh_view-->
     <android.support.v4.view.ViewPager
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="551dp"
         android:id="@+id/viewpager">
     </android.support.v4.view.ViewPager>
 

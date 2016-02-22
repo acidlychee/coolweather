@@ -1,21 +1,16 @@
 package com.example.lim.coolweather.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,21 +28,33 @@ public class ManagerCitys extends AppCompatActivity {
     Adapter adapter;
     Toast toast;
     private SharedPreferences sharePreferece;
-
+    ImageView addCity;
+    Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_manager_citys);
+        mContext = getApplicationContext();
         sharePreferece = PreferenceManager.getDefaultSharedPreferences(this);
         toast= Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
         data = new ArrayList<>();
         Set<String> citySet = sharePreferece.getStringSet("citySet", null);
+        addCity = (ImageView) findViewById(R.id.add_city);
+        addCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent =new Intent(mContext, ChooseAreaActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         for (String city:citySet
                 ) {
             data.add(city);
         }
 
-        listView=new LeftSlideDeleteListView(getApplicationContext());
-        setContentView(listView);
+        listView=(LeftSlideDeleteListView)findViewById(R.id.leftslide_citys);
+
         adapter=new Adapter();
         listView.setAdapter(adapter);
 
@@ -86,7 +93,7 @@ public class ManagerCitys extends AppCompatActivity {
                  * 第三个参数若是true，则该方法内部会调用父控件的addView方法把布局加入到其中，并返回父布局。由于ListView不允许使用addView添加控件，所以会抛异常。
                  * 若是false则不调用addView
                  */
-                convertView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_manager_citys, listView, false);
+                convertView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.citylist_item, listView, false);
                 holder.data=(TextView) convertView.findViewById(R.id.data);
                 convertView.setTag(holder);
             }

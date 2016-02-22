@@ -54,7 +54,7 @@ public class AutoUpdateService extends Service {
             HttpUtil.sendHttpRequest(url, new HttpCallbackListener() {
                 @Override
                 public void onFinished(String response) {
-                   Utility.handleWeatherInfo(AutoUpdateService.this, response, countryName);
+                   //Utility.handleWeatherInfo(AutoUpdateService.this, response, countryName);
                 }
 
                 @Override

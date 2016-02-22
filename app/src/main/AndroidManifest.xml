@@ -3,12 +3,20 @@
     package="com.example.lim.coolweather" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/weather"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        >
+        <meta-data
+            android:name="com.thinkland.juheapi.openid"
+            android:value="JH40cc4ca3cc6ea4b0f54d9016d8cc85d0" />
         <activity
             android:name=".activity.ChooseAreaActivity"
             android:label="@string/app_name" >

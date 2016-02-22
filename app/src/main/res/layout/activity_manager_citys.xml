@@ -4,15 +4,16 @@
     android:layout_height="wrap_content"
     android:background="#eee"
     android:padding="10dp"
-    android:orientation="vertical" >
-
-    <TextView
-        android:id="@+id/data"
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/add_city"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:src="@drawable/add"
+        />
+    <com.example.lim.coolweather.view.LeftSlideDeleteListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="30sp"
-        android:padding="15dp"
-        android:text="x"
-        android:gravity="center"
-        android:textColor="#000" />
+        android:id="@+id/leftslide_citys">
+    </com.example.lim.coolweather.view.LeftSlideDeleteListView>
 </LinearLayout>
