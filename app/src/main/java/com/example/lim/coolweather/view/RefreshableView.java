@@ -18,11 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.lim.coolweather.R;
-import com.example.lim.coolweather.adapter.WeatherAdapter;
-import com.example.lim.coolweather.model.WeatherInfo;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by lim on 2016/1/15.
@@ -47,10 +42,7 @@ public class RefreshableView extends LinearLayout implements View.OnTouchListene
     private float yDown;
     private int currentStatus;
 
-    public WeatherAdapter adapter;
-    public String cityName;
-    public List<WeatherInfo> mList;
-    public WeatherInfo weatherInfo;
+
     /**
      * 一分钟的毫秒值，用于判断上次的更新时间
      */
@@ -108,7 +100,6 @@ public class RefreshableView extends LinearLayout implements View.OnTouchListene
         description = (TextView) header.findViewById(R.id.description);
         updateAt = (TextView) header.findViewById(R.id.updated_at);
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mList = new ArrayList<>();
         refreshUpdatedAtValue();
         setOrientation(VERTICAL);
         addView(header, 0);

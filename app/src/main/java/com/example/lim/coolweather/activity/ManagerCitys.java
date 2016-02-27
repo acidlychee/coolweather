@@ -57,8 +57,6 @@ public class ManagerCitys extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, WeatherActivity.class);
-                //使返回weather时，不重新启动weateractivity，而是用原有的weatheracitvity.
-                //intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 intent.putExtra("fromMangerCitys",true);
                 startActivity(intent);
                 finish();

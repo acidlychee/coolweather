@@ -2,7 +2,7 @@ package com.example.lim.coolweather.model;
 
 public class PMBean {
 
-	private String aqi;// 空气质量指数
+	private String aqi;
 	private String quality;
 
 	public String getAqi() {

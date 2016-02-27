@@ -20,7 +20,6 @@ import android.widget.ListView;
 import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.adapter.WeatherAdapter;
 import com.example.lim.coolweather.adapter.WeatherVPAdapter;
-import com.example.lim.coolweather.db.CoolWeatherDB;
 import com.example.lim.coolweather.model.HoursWeatherBean;
 import com.example.lim.coolweather.model.WeatherBean;
 import com.example.lim.coolweather.model.WeatherInfo;
@@ -28,7 +27,7 @@ import com.example.lim.coolweather.service.AutoUpdateService;
 import com.example.lim.coolweather.util.HttpCallbackListener;
 import com.example.lim.coolweather.util.HttpUtil;
 import com.example.lim.coolweather.util.Utility;
-import com.example.lim.coolweather.view.RefreshableView;
+import com.example.lim.coolweather.view.WeatherInfoView;
 
 import org.json.JSONObject;
 
@@ -51,7 +50,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
     private WeatherVPAdapter vpAdapter;
     private List<View> mViewList;
     private String key = "aa32bc7542120890c9f6e8f57a628204";
-    private CoolWeatherDB db;
     private int mCurrentItemIndex;
     /**将小圆点的图片用数组表示,记录位置*/
     private List<ImageView> dotsViews;
@@ -63,7 +61,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.weather_layout);
-        db = CoolWeatherDB.getInstance(this);
         sharePreferece = PreferenceManager.getDefaultSharedPreferences(this);
         dotsGroup = (ViewGroup) findViewById(R.id.dots_group);
         mViewList = new ArrayList<>();
@@ -130,7 +127,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         int size = mViewList.size();
 
         for (int i = 0; i < size; i++){
-            RefreshableView refreshableView = (RefreshableView) mViewList.get(i).findViewById(R.id.refreshable_view);
+            WeatherInfoView refreshableView = (WeatherInfoView) mViewList.get(i).findViewById(R.id.refreshable_view);
             if (citySet != null && !citySet.contains(refreshableView.cityName)){
                 mViewList.remove(i);
                 removeDot(i);
@@ -154,7 +151,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
 
     }
 
-    private void queryWeather(final String country, final RefreshableView rev){
+    private void queryWeather(final String country, final WeatherInfoView rev){
         if (country == null || country.equals("")){
             Log.e("country", "country is null");
             return;
@@ -187,7 +184,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         });
     }
 
-    private void query3HoursWeather(final String country, final RefreshableView rev){
+    private void query3HoursWeather(final String country, final WeatherInfoView rev){
         String url = "http://v.juhe.cn/weather/forecast3h.php?cityname="+country+"&key="+key;
         HttpUtil.sendHttpRequest(url, new HttpCallbackListener() {
             @Override
@@ -216,7 +213,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         });
     }
 
-    private void showWeather(RefreshableView rev, String countryName) {
+    private void showWeather(WeatherInfoView rev, String countryName) {
 
         rev.mList.clear();
         rev.mList.add(rev.weatherInfo);
@@ -238,33 +235,33 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         }
     }
 
-    //为每个RefreshableView的listview对象添加一个单独的adapter
+    //为每个WeatherInfoView的listview对象添加一个单独的adapter
     private void initWeatherView(final View v, Context context, final String country){
-        final RefreshableView refreshableView = (RefreshableView) v.findViewById(R.id.refreshable_view);
-        refreshableView.adapter = new WeatherAdapter(this, refreshableView.mList);
-        refreshableView.cityName = country;
-        refreshableView.weatherInfo = new WeatherInfo();
-        ListView mlistView = (ListView) refreshableView.findViewById(R.id.list_view);
-        mlistView.setAdapter(refreshableView.adapter);
+        final WeatherInfoView wthInfV = (WeatherInfoView) v.findViewById(R.id.refreshable_view);
+        wthInfV.adapter = new WeatherAdapter(this, wthInfV.mList);
+        wthInfV.cityName = country;
+        wthInfV.weatherInfo = new WeatherInfo();
+        ListView mlistView = (ListView) wthInfV.findViewById(R.id.list_view);
+        mlistView.setAdapter(wthInfV.adapter);
 
-        refreshableView.setOnRefreshListener(new RefreshableView.PullToRefreshListener() {
+        wthInfV.setOnRefreshListener(new WeatherInfoView.PullToRefreshListener() {
             @Override
             public void onRefresh() {
-                String countryName = refreshableView.cityName;
+                String countryName = wthInfV.cityName;
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 if (!TextUtils.isEmpty(countryName)) {
-                    queryWeather(countryName, refreshableView);
+                    queryWeather(countryName, wthInfV);
                     //query3HoursWeather(countryName, refreshableView);
                 }
-                refreshableView.refreshFinish();
+                wthInfV.refreshFinish();
             }
         }, 0);
 
-        queryWeather(country, refreshableView);
+        queryWeather(country, wthInfV);
         //query3HoursWeather(country, refreshableView);
 
     }
@@ -297,6 +294,10 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
 
     }
 
+    /**
+     * 当从ManagerCitys返回时，进行处理
+     * @param intent
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);

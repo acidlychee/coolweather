@@ -211,8 +211,7 @@ public class WeatherAdapter extends BaseAdapter {
 
     private void setWeatherViews(WeatherBean bean) {
 
-        //tv_city.setText(bean.getCity());
-        //tv_release.setText(bean.getRelease());
+
         if (bean == null){
             //Log.e("error","weatherbean is null");
             return;
