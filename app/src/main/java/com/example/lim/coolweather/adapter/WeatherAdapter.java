@@ -18,7 +18,6 @@ import com.example.lim.coolweather.model.WeatherInfo;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lim on 2016/1/16.
@@ -61,7 +60,8 @@ public class WeatherAdapter extends BaseAdapter {
                 tv_fourthday_temp_b,// 第四天温度b
                 tv_humidity,// 湿度
                 tv_wind, tv_uv_index,// 紫外线指数
-                tv_dressing_index;// 穿衣指数
+                tv_dressing_index,// 穿衣指数
+                tv_city_name;
 
         private ImageView iv_now_weather,// 现在
                 iv_next_three,// 3小时
@@ -205,6 +205,8 @@ public class WeatherAdapter extends BaseAdapter {
         holder.tv_wind = (TextView) convertView.findViewById(R.id.tv_wind);
         holder.tv_uv_index = (TextView) convertView.findViewById(R.id.tv_uv_index);
         holder.tv_dressing_index = (TextView) convertView.findViewById(R.id.tv_dress_index);
+
+        holder.tv_city_name = (TextView) convertView.findViewById(R.id.tv_city_name);
     }
 
     private void setWeatherViews(WeatherBean bean) {
@@ -212,9 +214,11 @@ public class WeatherAdapter extends BaseAdapter {
         //tv_city.setText(bean.getCity());
         //tv_release.setText(bean.getRelease());
         if (bean == null){
-            Log.e("error","weatherbean is null");
+            //Log.e("error","weatherbean is null");
             return;
         }
+
+        holder.tv_city_name.setText(bean.getCity());
         holder.tv_now_weather.setText(bean.getWeather_str());
         String[] tempArr = bean.getTemp().split("~");
         String temp_str_a = tempArr[1].substring(0, tempArr[1].indexOf("℃"));

@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.Adapter;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,16 +50,27 @@ public class ChooseAreaActivity extends Activity {
     private ProgressDialog progressDialog;
     private Boolean isFromWeatherActivity;
     private static final String SUPPORT_CITY_API = "http://v.juhe.cn/weather/citys?key=1d1bad6d9ea452439b2731aff5a03abf";
-
+    private ImageView iv_back_choosecity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //直接跳到WeatherActivity
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
-
+        isFromWeatherActivity = getIntent().getBooleanExtra("fromCityManager", false);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.choose_area);
+        iv_back_choosecity = (ImageView) findViewById(R.id.iv_back_choosecity);
         coolWeatherDB = CoolWeatherDB.getInstance(this);
         Set<String> citySet = sharedPreferences.getStringSet("citySet", null);
+
+        iv_back_choosecity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ManagerCitys.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         if (citySet != null && !isFromWeatherActivity){
             if (citySet.size()!=0){
                 Intent intent = new Intent(this,WeatherActivity.class);
@@ -69,7 +80,7 @@ public class ChooseAreaActivity extends Activity {
             }
         }
 
-        setContentView(R.layout.choose_area);
+
         listView = (ListView) findViewById(R.id.list_view);
         titleText = (TextView) findViewById(R.id.title_text);
         adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,dataList);
@@ -156,7 +167,7 @@ public class ChooseAreaActivity extends Activity {
             queryProvince();
         }else{
             if (isFromWeatherActivity) {
-                Intent intent = new Intent(this, WeatherActivity.class);
+                Intent intent = new Intent(this, ManagerCitys.class);
                 startActivity(intent);
             }
             finish();

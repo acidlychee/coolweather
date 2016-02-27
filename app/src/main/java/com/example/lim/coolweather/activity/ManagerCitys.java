@@ -1,14 +1,15 @@
 package com.example.lim.coolweather.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,11 +19,11 @@ import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.view.LeftSlideDeleteListView;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
-public class ManagerCitys extends AppCompatActivity {
+public class ManagerCitys extends Activity {
     List<String> data;
     LeftSlideDeleteListView listView;
     Adapter adapter;
@@ -30,11 +31,14 @@ public class ManagerCitys extends AppCompatActivity {
     private SharedPreferences sharePreferece;
     ImageView addCity;
     Context mContext;
+    ImageView backBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_manager_citys);
         mContext = getApplicationContext();
+        backBtn = (ImageView) findViewById(R.id.iv_back_citym);
         sharePreferece = PreferenceManager.getDefaultSharedPreferences(this);
         toast= Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
         data = new ArrayList<>();
@@ -44,6 +48,18 @@ public class ManagerCitys extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent =new Intent(mContext, ChooseAreaActivity.class);
+                intent.putExtra("fromCityManager",true);
+                startActivity(intent);
+                finish();
+            }
+        });
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, WeatherActivity.class);
+                //使返回weather时，不重新启动weateractivity，而是用原有的weatheracitvity.
+                //intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra("fromMangerCitys",true);
                 startActivity(intent);
                 finish();
             }
@@ -62,11 +78,11 @@ public class ManagerCitys extends AppCompatActivity {
             @Override
             public void OnListViewItemDeleteClick(int position) {
                 System.out.println(position);
-                toast.setText("删除位置：" + position + "");
-                toast.show();
+                //toast.setText("删除位置：" + position + "");
+                //toast.show();
                 data.remove(position);
                 SharedPreferences.Editor editor = sharePreferece.edit();
-                Set<String> cityset = new HashSet<String>();
+                Set<String> cityset = new TreeSet<String>();
                 cityset.addAll(data);
                 editor.putStringSet("citySet",cityset);
                 editor.commit();

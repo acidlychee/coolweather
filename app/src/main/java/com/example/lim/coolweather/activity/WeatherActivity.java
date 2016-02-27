@@ -15,9 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.adapter.WeatherAdapter;
@@ -34,7 +32,6 @@ import com.example.lim.coolweather.view.RefreshableView;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,23 +41,19 @@ import java.util.Set;
 public class WeatherActivity extends Activity implements View.OnClickListener,ViewPager.OnPageChangeListener {
 
 
-    private LinearLayout weatherInfoLayout;
     /**
      * 用于显示城市名
      */
-    private TextView cityNameText;;
 
-    RefreshableView refreshableView;
-    private WeatherAdapter mAdaper;
     private SharedPreferences sharePreferece;
-    private ListView mlistView;
     private ViewPager mViewPager;
+    private WeatherVPAdapter vpAdapter;
     private List<View> mViewList;
     private String key = "aa32bc7542120890c9f6e8f57a628204";
     private CoolWeatherDB db;
-
-    /**将小圆点的图片用数组表示*/
-    private ImageView[] dotsViews;
+    private int mCurrentItemIndex;
+    /**将小圆点的图片用数组表示,记录位置*/
+    private List<ImageView> dotsViews;
     //包裹小圆点的LinearLayout
     private ViewGroup dotsGroup;
 
@@ -72,34 +65,20 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         db = CoolWeatherDB.getInstance(this);
         sharePreferece = PreferenceManager.getDefaultSharedPreferences(this);
         dotsGroup = (ViewGroup) findViewById(R.id.dots_group);
-        //weather_header
-        //cityNameText = (TextView)findViewById(R.id.city_name);
+        mViewList = new ArrayList<>();
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
         Button changeCity = (Button) findViewById(R.id.change_city);
-        //Button refreshWeather = (Button) findViewById(R.id.refesh_weather);
         changeCity.setOnClickListener(this);
-        //refreshWeather.setOnClickListener(this);
 
-        if (getIntent().getStringExtra("countryName")!= null ){
-            Set<String> citySet = sharePreferece.getStringSet("citySet", null);
-            if (citySet == null){
-                citySet = new HashSet<>();
-            }
-            citySet.add(getIntent().getStringExtra("countryName"));
-            SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(this).edit();
-            editor.remove("citySet");
-            editor.commit();
-            editor.putStringSet("citySet", citySet);
-            editor.commit();
+        if (!getIntent().getBooleanExtra("fromMangerCitys",false)){
+            initViewPager();
+            initDots();
         }
-
-        initViewPager();
 
     }
 
     public void initViewPager(){
-        //init viewPager
-        mViewList = new ArrayList<>();
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+
         Set<String> citySet = sharePreferece.getStringSet("citySet", null);
         for (String city:citySet
              ) {
@@ -107,31 +86,72 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
             mViewList.add(w1);
             initWeatherView(w1, this, city);
         }
-        mViewPager.setAdapter(new WeatherVPAdapter(mViewList, this));
+        vpAdapter = new WeatherVPAdapter(mViewList, this);
+        mViewPager.setAdapter(vpAdapter);
         mViewPager.addOnPageChangeListener(this);
-        //dots init
-        dotsViews = new ImageView[mViewList.size()];
-        for (int i = 0; i < mViewList.size(); i++){
+    }
 
-            ImageView dotView = new ImageView(WeatherActivity.this);
-            //dotView.setLayoutParams(new ViewGroup.LayoutParams(20,20));//创建一个宽高均为20 的布局
-            dotView.setPadding(15, 0, 15, 0);
-            dotsViews[i] = dotView;
-            if (i == 0){
-                dotView.setImageResource(R.drawable.page_indicator_focused);
-            }else{
-                dotView.setImageResource(R.drawable.page_indicator_unfocused);
-            }
-            dotsGroup.addView(dotView);
+    /**
+     * 根据viewPager数据的数量初始化indicator
+     */
+    public void initDots(){
+        dotsViews = new ArrayList<>();
+        for (int i = 0; i < mViewList.size(); i++){
+            addDot();
         }
+        dotsViews.get(0).setImageResource(R.drawable.page_indicator_focused);
+    }
+
+    public  void addDot(){
+        ImageView dotView = new ImageView(WeatherActivity.this);
+        dotView.setPadding(15, 0, 15, 0);
+        dotView.setImageResource(R.drawable.page_indicator_unfocused);
+        dotsViews.add(dotView);
+        dotsGroup.addView(dotView);
+    }
+
+    public void addToViewPager(String cityName){
+        View w1 = LayoutInflater.from(this).inflate(R.layout.pull_reflesh_view, null);
+        mViewList.add(w1);
+        initWeatherView(w1, this, cityName);
+        vpAdapter.notifyDataSetChanged();
+        //dotsGroup.removeViewAt();
+    }
+
+    public void removeViewFromViewPager(){
+        mCurrentItemIndex = mViewPager.getCurrentItem();
+        Set<String> citySet = sharePreferece.getStringSet("citySet", null);
+        for (int i = 0; i < mViewList.size(); i++){
+            RefreshableView refreshableView = (RefreshableView) mViewList.get(i).findViewById(R.id.refreshable_view);
+            if (citySet != null && !citySet.contains(refreshableView.cityName)){
+                mViewList.remove(i);
+                removeDots(i);
+            }
+        }
+        vpAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * dotsViews 与 dotsGroup的 每一个点的位置应该是相同的
+     * 且与mViewList的位置应该也是相同的
+     * @param index
+     */
+    public void removeDots(int index){
+        dotsViews.remove(index);
+        dotsGroup.removeViewAt(index);
+        if (mCurrentItemIndex == index && index <= mViewList.size()-1){
+            dotsViews.get(index).setImageResource(R.drawable.page_indicator_focused);
+        }
+
     }
 
     private void queryWeather(final String country, final RefreshableView rev){
         if (country == null || country.equals("")){
-            Log.e("country","country is null");
+            Log.e("country", "country is null");
             return;
         }
         String url = "http://v.juhe.cn/weather/index?format=2&cityname="+country+"&key="+key;
+        Log.i("queryWeather: ",url);
         HttpUtil.sendHttpRequest(url, new HttpCallbackListener() {
             @Override
             public void onFinished(String response) {
@@ -174,7 +194,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
                             }
                         });
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -188,15 +208,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
     }
 
     private void showWeather(RefreshableView rev, String countryName) {
-        //List<WeatherInfo> weatherInfoList = db.getWeathers(countryName);
-        //WeatherInfo weatherInfo = null;
 
         rev.mList.clear();
         rev.mList.add(rev.weatherInfo);
         rev.adapter.notifyDataSetChanged();
-                //cityNameText.setText(countryName);
 
-                //cityNameText.setVisibility(View.VISIBLE);
 /*        Intent intent = new Intent(this, AutoUpdateService.class);
         startService(intent);*/
     }
@@ -208,14 +224,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
                 Intent intent = new Intent(this, ManagerCitys.class);
                 intent.putExtra("from_weather_activity", true);
                 startActivity(intent);
-                finish();
+                //finish();
                 break;
-            /*case R.id.refesh_weather:
-                Intent intent1 = new Intent(this, ManagerCitys.class);
-                startActivity(intent1);
-                finish();
-                break;
-            */default:
+            default:
                 break;
         }
     }
@@ -239,45 +250,35 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
                     e.printStackTrace();
                 }
                 if (!TextUtils.isEmpty(countryName)) {
-                    queryWeather(countryName, refreshableView);
-                    query3HoursWeather(countryName, refreshableView);
-                    //showWeather(refreshableView, country);
+                    //queryWeather(countryName, refreshableView);
+                    //query3HoursWeather(countryName, refreshableView);
                 }
                 refreshableView.refreshFinish();
             }
         }, 0);
 
         queryWeather(country, refreshableView);
-        query3HoursWeather(country, refreshableView);
-        //showWeather(refreshableView, country);
-
-/*        if (db.getWeathers(country).size()!=0){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    showWeather(refreshableView, country);
-                }
-            });
-        }else{
-            queryWeather(country, refreshableView);
-        }*/
+        //query3HoursWeather(country, refreshableView);
 
     }
 
 
-    //viewpager OnPageChangeListener
 
-
+    /**
+     * 根据viwpager切换的位置确定当前选择的indicator
+     * @param position
+     */
     @Override
     public void onPageSelected(int position) {
-        for (int i=0; i < dotsViews.length; i++ ){
+        for (int i=0; i < dotsViews.size(); i++ ){
             if (position == i ){
-                dotsViews[i].setImageResource(R.drawable.page_indicator_focused);
+                dotsViews.get(i).setImageResource(R.drawable.page_indicator_focused);
             }else{
-                dotsViews[i].setImageResource(R.drawable.page_indicator_unfocused);
+                dotsViews.get(i).setImageResource(R.drawable.page_indicator_unfocused);
             }
         }
     }
+
 
     @Override
     public void onPageScrollStateChanged(int state) {
@@ -288,4 +289,29 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String cityName = intent.getStringExtra("countryName");
+        Set<String> citySet = sharePreferece.getStringSet("citySet", null);
+        if (cityName != null ){
+/*            if (citySet == null){
+                citySet = new TreeSet<>();
+            }*/
+            citySet.add(cityName);
+            SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.remove("citySet");
+            editor.commit();
+            editor.putStringSet("citySet", citySet);
+            editor.commit();
+            addToViewPager(cityName);
+            addDot();
+        }
+        //有问题，如果同时添加删除，使得size不变。
+        if (citySet != null && citySet.size() < mViewList.size()){
+            removeViewFromViewPager();
+        }
+    }
+
 }

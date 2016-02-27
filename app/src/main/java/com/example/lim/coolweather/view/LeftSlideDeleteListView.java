@@ -11,9 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.AbsListView;
-import android.widget.Adapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -121,8 +119,8 @@ public class LeftSlideDeleteListView extends ListView {
             deleteTV.setBackgroundColor(Color.RED);
             deleteTV.setTextColor(Color.WHITE);
             deleteTV.setGravity(Gravity.CENTER);
-            deleteTV.setTextSize(TypedValue.COMPLEX_UNIT_SP,25);
-            deleteTV.setPadding(dptopx(30, getContext()), 0, dptopx(30, getContext()), 0);
+            deleteTV.setTextSize(TypedValue.COMPLEX_UNIT_SP,22);
+            deleteTV.setPadding(dptopx(22, getContext()), 0, dptopx(22, getContext()), 0);
 
             deleteTV.setOnClickListener(new OnClickListener() {
                 @Override
