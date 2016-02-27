@@ -24,6 +24,7 @@ import com.example.lim.coolweather.db.CoolWeatherDB;
 import com.example.lim.coolweather.model.HoursWeatherBean;
 import com.example.lim.coolweather.model.WeatherBean;
 import com.example.lim.coolweather.model.WeatherInfo;
+import com.example.lim.coolweather.service.AutoUpdateService;
 import com.example.lim.coolweather.util.HttpCallbackListener;
 import com.example.lim.coolweather.util.HttpUtil;
 import com.example.lim.coolweather.util.Utility;
@@ -74,6 +75,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
             initViewPager();
             initDots();
         }
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
 
     }
 
@@ -118,14 +121,20 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         //dotsGroup.removeViewAt();
     }
 
+    /**
+     * 该逻辑只支持单个城市删除
+     */
     public void removeViewFromViewPager(){
         mCurrentItemIndex = mViewPager.getCurrentItem();
         Set<String> citySet = sharePreferece.getStringSet("citySet", null);
-        for (int i = 0; i < mViewList.size(); i++){
+        int size = mViewList.size();
+
+        for (int i = 0; i < size; i++){
             RefreshableView refreshableView = (RefreshableView) mViewList.get(i).findViewById(R.id.refreshable_view);
             if (citySet != null && !citySet.contains(refreshableView.cityName)){
                 mViewList.remove(i);
-                removeDots(i);
+                removeDot(i);
+                break;
             }
         }
         vpAdapter.notifyDataSetChanged();
@@ -136,7 +145,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
      * 且与mViewList的位置应该也是相同的
      * @param index
      */
-    public void removeDots(int index){
+    public void removeDot(int index){
         dotsViews.remove(index);
         dotsGroup.removeViewAt(index);
         if (mCurrentItemIndex == index && index <= mViewList.size()-1){
@@ -213,8 +222,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         rev.mList.add(rev.weatherInfo);
         rev.adapter.notifyDataSetChanged();
 
-/*        Intent intent = new Intent(this, AutoUpdateService.class);
-        startService(intent);*/
     }
 
     @Override
@@ -250,7 +257,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
                     e.printStackTrace();
                 }
                 if (!TextUtils.isEmpty(countryName)) {
-                    //queryWeather(countryName, refreshableView);
+                    queryWeather(countryName, refreshableView);
                     //query3HoursWeather(countryName, refreshableView);
                 }
                 refreshableView.refreshFinish();

@@ -87,6 +87,9 @@ public class ManagerCitys extends Activity {
                 editor.putStringSet("citySet",cityset);
                 editor.commit();
                 adapter.notifyDataSetChanged();
+                Intent intent = new Intent(getApplicationContext(), WeatherActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 

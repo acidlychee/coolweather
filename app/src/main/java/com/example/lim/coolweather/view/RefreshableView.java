@@ -19,12 +19,10 @@ import android.widget.TextView;
 
 import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.adapter.WeatherAdapter;
-import com.example.lim.coolweather.model.WeatherBean;
 import com.example.lim.coolweather.model.WeatherInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lim on 2016/1/15.
@@ -152,17 +150,17 @@ public class RefreshableView extends LinearLayout implements View.OnTouchListene
         updateAt.setText(updateAtValue);
     }
 
-    //onLayout什么时候调用？
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         if (changed && !loadOnce){
             hideHeaderHeight = -header.getHeight();
             layoutParams = (MarginLayoutParams)header.getLayoutParams();
-            layoutParams.topMargin = hideHeaderHeight; //不需要执行setlayoutParams吗？
-            listView = (ListView) getChildAt(1); //listview一定存在？且在第二个元素？
+            layoutParams.topMargin = hideHeaderHeight;
+            listView = (ListView) getChildAt(1);
             listView.setOnTouchListener(this);
             loadOnce = true;
+            header.setLayoutParams(layoutParams);
         }
     }
 
