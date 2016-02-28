@@ -2,7 +2,6 @@ package com.example.lim.coolweather.util;
 
 import com.example.lim.coolweather.db.CoolWeatherDB;
 import com.example.lim.coolweather.model.City;
-import com.example.lim.coolweather.model.Country;
 import com.example.lim.coolweather.model.FutureWeatherBean;
 import com.example.lim.coolweather.model.HoursWeatherBean;
 import com.example.lim.coolweather.model.Province;
@@ -23,6 +22,7 @@ import java.util.List;
  * Created by lim on 2015/12/29.
  */
 public class Utility {
+
     public static boolean handelSupportCitysResponse(CoolWeatherDB coolWeatherDB,String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -31,29 +31,35 @@ public class Utility {
                 for (int i = 0; i < jarr.length(); i++) {
 
                     JSONObject jo = jarr.getJSONObject(i);
-                    //保存省份
                     String provinceName = jo.getString("province");
+                    String cityName = jo.getString("city");
+                    String countryName = jo.getString("district");
+
+                    //只保留到城市
+                    if (!cityName.equals(countryName)){
+                        continue;
+                    }
+
+                    //保存省份
                     int provinceId = coolWeatherDB.getProvinceId(provinceName);
                     if (provinceId == -1){
                         Province province = new Province();
                         province.setProvinceName(provinceName);
                         coolWeatherDB.saveProvince(province);
                     }
+
                     //保存城市
-                    String cityName = jo.getString("city");
-                    int cityId = coolWeatherDB.getCityId(cityName);
-                    if (cityId == -1){
-                        City city = new City();
-                        city.setCityName(cityName);
-                        city.setProvinceId(coolWeatherDB.getProvinceId(provinceName));
-                        coolWeatherDB.saveCity(city);
-                    }
-                    //保存县
+                    City city = new City();
+                    city.setCityName(cityName);
+                    city.setProvinceId(coolWeatherDB.getProvinceId(provinceName));
+                    coolWeatherDB.saveCity(city);
+
+/*                    //保存县
                     String countryName = jo.getString("district");
                     Country country = new Country();
                     country.setCityId(coolWeatherDB.getCityId(cityName));
                     country.setCountryName(countryName);
-                    coolWeatherDB.saveCountry(country);
+                    coolWeatherDB.saveCountry(country);*/
                 }
                 return true;
             }

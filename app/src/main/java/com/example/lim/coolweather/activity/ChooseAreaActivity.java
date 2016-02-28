@@ -49,7 +49,7 @@ public class ChooseAreaActivity extends Activity {
     private int currentLevel;
     private ProgressDialog progressDialog;
     private Boolean isFromWeatherActivity;
-    private static final String SUPPORT_CITY_API = "http://v.juhe.cn/weather/citys?key=1d1bad6d9ea452439b2731aff5a03abf";
+    private static final String SUPPORT_CITY_API = "http://v.juhe.cn/weather/citys?key=aa32bc7542120890c9f6e8f57a628204";
     private ImageView iv_back_choosecity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class ChooseAreaActivity extends Activity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         isFromWeatherActivity = getIntent().getBooleanExtra("fromCityManager", false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.choose_area);
+        setContentView(R.layout.activity_choose_area);
         iv_back_choosecity = (ImageView) findViewById(R.id.iv_back_choosecity);
         coolWeatherDB = CoolWeatherDB.getInstance(this);
         Set<String> citySet = sharedPreferences.getStringSet("citySet", null);
@@ -80,7 +80,6 @@ public class ChooseAreaActivity extends Activity {
             }
         }
 
-
         listView = (ListView) findViewById(R.id.list_view);
         titleText = (TextView) findViewById(R.id.title_text);
         adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,dataList);
@@ -93,15 +92,19 @@ public class ChooseAreaActivity extends Activity {
                     queryCity();
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
-                    queryCountry();
-                } else if (currentLevel == LEVEL_COUNTRY) {
+                    String countryName = selectedCity.getCityName();
+                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+                    intent.putExtra("countryName", countryName);
+                    startActivity(intent);
+                    finish();
+                } /*else if (currentLevel == LEVEL_COUNTRY) {
                     selectedCountry = countryList.get(position);
                     String countryName = selectedCountry.getCountryName();
                     Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
                     intent.putExtra("countryName", countryName);
                     startActivity(intent);
                     finish();
-                }
+                }*/
             }
         });
         queryProvince();
@@ -114,6 +117,7 @@ public class ChooseAreaActivity extends Activity {
             public void onFinished(String response) {
                 boolean result = false;
                 result = Utility.handelSupportCitysResponse(coolWeatherDB, response);
+                closeProgressDialog();
                 if (result) {
                     runOnUiThread(new Runnable() {
                         @Override
@@ -124,9 +128,9 @@ public class ChooseAreaActivity extends Activity {
                             if ("City".equals(type)) {
                                 queryCity();
                             }
-                            if ("Country".equals(type)) {
+/*                            if ("Country".equals(type)) {
                                 queryCountry();
-                            }
+                            }*/
                         }
                     });
                 }
@@ -174,7 +178,7 @@ public class ChooseAreaActivity extends Activity {
         }
     }
 
-    private void queryCountry() {
+/*    private void queryCountry() {
         countryList = coolWeatherDB.loadCountrys(selectedCity.getId());
         if (!countryList.isEmpty()){
 
@@ -187,7 +191,7 @@ public class ChooseAreaActivity extends Activity {
             titleText.setText(selectedCity.getCityName());
             currentLevel = LEVEL_COUNTRY;
         }
-    }
+    }*/
 
     private void queryProvince(){
         provinceList = coolWeatherDB.loadProvinces();

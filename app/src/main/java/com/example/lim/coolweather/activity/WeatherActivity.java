@@ -1,10 +1,13 @@
 package com.example.lim.coolweather.activity;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -20,20 +23,14 @@ import android.widget.ListView;
 import com.example.lim.coolweather.R;
 import com.example.lim.coolweather.adapter.WeatherAdapter;
 import com.example.lim.coolweather.adapter.WeatherVPAdapter;
-import com.example.lim.coolweather.model.HoursWeatherBean;
-import com.example.lim.coolweather.model.WeatherBean;
 import com.example.lim.coolweather.model.WeatherInfo;
 import com.example.lim.coolweather.service.AutoUpdateService;
-import com.example.lim.coolweather.util.HttpCallbackListener;
-import com.example.lim.coolweather.util.HttpUtil;
-import com.example.lim.coolweather.util.Utility;
 import com.example.lim.coolweather.view.WeatherInfoView;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by lim on 2016/1/4.
@@ -41,26 +38,33 @@ import java.util.Set;
 public class WeatherActivity extends Activity implements View.OnClickListener,ViewPager.OnPageChangeListener {
 
 
-    /**
-     * 用于显示城市名
-     */
-
     private SharedPreferences sharePreferece;
     private ViewPager mViewPager;
     private WeatherVPAdapter vpAdapter;
+    /**
+     * ViewPager包含的所有View
+     */
     private List<View> mViewList;
-    private String key = "aa32bc7542120890c9f6e8f57a628204";
+
+    /**
+     * ViewPager当前的item位置
+     */
     private int mCurrentItemIndex;
-    /**将小圆点的图片用数组表示,记录位置*/
+    /**
+     * 将小圆点的图片用数组表示,记录位置
+     */
     private List<ImageView> dotsViews;
-    //包裹小圆点的LinearLayout
+    /**
+     * 包裹小圆点的LinearLayout
+     */
     private ViewGroup dotsGroup;
+    private AutoUpdateService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.weather_layout);
+        setContentView(R.layout.activity_weather);
         sharePreferece = PreferenceManager.getDefaultSharedPreferences(this);
         dotsGroup = (ViewGroup) findViewById(R.id.dots_group);
         mViewList = new ArrayList<>();
@@ -68,21 +72,64 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         Button changeCity = (Button) findViewById(R.id.change_city);
         changeCity.setOnClickListener(this);
 
-        if (!getIntent().getBooleanExtra("fromMangerCitys",false)){
-            initViewPager();
-            initDots();
-        }
         Intent intent = new Intent(this, AutoUpdateService.class);
         startService(intent);
+        bindService(intent,conn,BIND_AUTO_CREATE);
+
+        //加入第一个城市
+        String cityName = getIntent().getStringExtra("countryName");
+        Set<String> citySet = sharePreferece.getStringSet("citySet", null);
+        if (citySet == null){
+            citySet = new TreeSet<>();
+        }
+        citySet.add(cityName);
+        SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.remove("citySet");
+        editor.commit();
+        editor.putStringSet("citySet", citySet);
+        editor.commit();
 
     }
 
+    ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i("weatherservice","connect....success");
+            mService = ((AutoUpdateService.LocalBinder)service).getService();
+            mService.setmCallBack(new AutoUpdateService.ParseWeatherInfoCallBack() {
+                @Override
+                public void OnParseWeatherInfoFinish(final WeatherInfo weatherInfo, final WeatherInfoView wthInfV) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            wthInfV.mList.clear();
+                            wthInfV.mList.add(weatherInfo);
+                            wthInfV.adapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
+            mService.setmViewList(mViewList);
+            initViewPager();
+            initDots();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+
+    /**
+     * 初始化ViewPager及其内容，只在启动应用时调用
+     */
     public void initViewPager(){
 
         Set<String> citySet = sharePreferece.getStringSet("citySet", null);
         for (String city:citySet
              ) {
-            View w1 = LayoutInflater.from(this).inflate(R.layout.pull_reflesh_view, null);
+            WeatherInfoView w1 = (WeatherInfoView)LayoutInflater.from(this).inflate(R.layout.pull_reflesh_view, null);
             mViewList.add(w1);
             initWeatherView(w1, this, city);
         }
@@ -111,11 +158,10 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
     }
 
     public void addToViewPager(String cityName){
-        View w1 = LayoutInflater.from(this).inflate(R.layout.pull_reflesh_view, null);
+        WeatherInfoView w1 = (WeatherInfoView)LayoutInflater.from(this).inflate(R.layout.pull_reflesh_view, null);
         mViewList.add(w1);
         initWeatherView(w1, this, cityName);
         vpAdapter.notifyDataSetChanged();
-        //dotsGroup.removeViewAt();
     }
 
     /**
@@ -151,75 +197,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
 
     }
 
-    private void queryWeather(final String country, final WeatherInfoView rev){
-        if (country == null || country.equals("")){
-            Log.e("country", "country is null");
-            return;
-        }
-        String url = "http://v.juhe.cn/weather/index?format=2&cityname="+country+"&key="+key;
-        Log.i("queryWeather: ",url);
-        HttpUtil.sendHttpRequest(url, new HttpCallbackListener() {
-            @Override
-            public void onFinished(String response) {
-                try {
-                    WeatherBean weatherBean = Utility.parserWeather(new JSONObject(response));
-                    if (weatherBean != null) {
-                        rev.weatherInfo.setWeatherBean(weatherBean);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showWeather(rev, country);
-                            }
-                        });
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
 
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private void query3HoursWeather(final String country, final WeatherInfoView rev){
-        String url = "http://v.juhe.cn/weather/forecast3h.php?cityname="+country+"&key="+key;
-        HttpUtil.sendHttpRequest(url, new HttpCallbackListener() {
-            @Override
-            public void onFinished(String response) {
-                try {
-                    List<HoursWeatherBean> list = Utility.parserForecast3h(new JSONObject(response));
-                    if (list != null) {
-                        rev.weatherInfo.setHoursWeatherBeanList(list);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showWeather(rev, country);
-                            }
-                        });
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private void showWeather(WeatherInfoView rev, String countryName) {
-
-        rev.mList.clear();
-        rev.mList.add(rev.weatherInfo);
-        rev.adapter.notifyDataSetChanged();
-
-    }
 
     @Override
     public void onClick(View v) {
@@ -236,8 +214,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
     }
 
     //为每个WeatherInfoView的listview对象添加一个单独的adapter
-    private void initWeatherView(final View v, Context context, final String country){
-        final WeatherInfoView wthInfV = (WeatherInfoView) v.findViewById(R.id.refreshable_view);
+    private void initWeatherView(final WeatherInfoView wthInfV, Context context, final String country){
         wthInfV.adapter = new WeatherAdapter(this, wthInfV.mList);
         wthInfV.cityName = country;
         wthInfV.weatherInfo = new WeatherInfo();
@@ -254,15 +231,13 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
                     e.printStackTrace();
                 }
                 if (!TextUtils.isEmpty(countryName)) {
-                    queryWeather(countryName, wthInfV);
-                    //query3HoursWeather(countryName, refreshableView);
+                     //mService.getWeatherInfo(countryName,wthInfV);
                 }
                 wthInfV.refreshFinish();
             }
         }, 0);
+        mService.getWeatherInfo(country,wthInfV);
 
-        queryWeather(country, wthInfV);
-        //query3HoursWeather(country, refreshableView);
 
     }
 
@@ -304,9 +279,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         String cityName = intent.getStringExtra("countryName");
         Set<String> citySet = sharePreferece.getStringSet("citySet", null);
         if (cityName != null ){
-/*            if (citySet == null){
-                citySet = new TreeSet<>();
-            }*/
             citySet.add(cityName);
             SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(this).edit();
             editor.remove("citySet");
@@ -322,4 +294,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener,Vi
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(conn);
+    }
 }
